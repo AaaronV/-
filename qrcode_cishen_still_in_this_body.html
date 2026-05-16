@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>此身 — 扫码访问</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #000;
+  color: #f2f2f2;
+  font-family: 'Noto Serif SC', serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.02em;
+}
+
+.card {
+  text-align: center;
+  padding: 5.2rem 3.8rem 4.8rem;
+  border: 1px solid #1b1b1b;
+  max-width: 420px;
+  width: 90%;
+  background: #020202;
+}
+
+.eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.46em;
+  text-transform: uppercase;
+  color: #4b4b4b;
+  margin-bottom: 3.2rem;
+}
+
+.title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 3.15rem;
+  font-weight: 300;
+  line-height: 0.95;
+  margin-bottom: 0.85rem;
+  letter-spacing: 0.18em;
+}
+
+.title em {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  color: #777;
+  display: block;
+  font-size: 1.05rem;
+  letter-spacing: 0.18em;
+  margin-top: 1.2rem;
+}
+
+.divider {
+  width: 28px;
+  height: 1px;
+  background: #333;
+  margin: 2.6rem auto 2.7rem;
+}
+
+.qr-outer {
+  width: 196px;
+  height: 196px;
+  margin: 0 auto 2.35rem;
+  padding: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-outer img {
+  width: 180px;
+  height: 180px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.qr-placeholder {
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: #aaa;
+  text-align: center;
+  line-height: 1.8;
+  letter-spacing: 0.1em;
+}
+
+.url-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.46rem;
+  letter-spacing: 0.38em;
+  color: #3b3b3b;
+  text-transform: uppercase;
+  margin-bottom: 0.85rem;
+}
+
+.url-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  color: #777;
+  word-break: break-all;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+.note {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 4.4rem 2.4rem 4.2rem;
+  }
+
+  .title {
+    font-size: 2.7rem;
+  }
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">STILL IN THIS BODY</div>
+  <div class="title">此身<em>enter quietly</em></div>
+  <div class="divider"></div>
+
+  <div class="qr-outer" id="qrWrap">
+    <!-- QR will be injected by JS -->
+  </div>
+
+  <div class="url-label">address</div>
+  <div class="url-text" id="urlText">待发布</div>
+
+</div>
+
+<script>
+  // Replace this with your actual GitHub Pages URL after publishing
+  const SITE_URL = 'https://aaaronv.github.io/-/';
+
+  const wrap = document.getElementById('qrWrap');
+  const urlText = document.getElementById('urlText');
+
+  if (SITE_URL.includes('yourusername')) {
+    // Placeholder state
+    wrap.innerHTML = `<div class="qr-placeholder">发布网站后<br>此处自动<br>生成二维码</div>`;
+    urlText.textContent = '— 待填入 GitHub Pages 地址 —';
+  } else {
+    // Real URL: use Google Charts QR API
+    const encoded = encodeURIComponent(SITE_URL);
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encoded}`;
+    img.alt = 'QR Code';
+    img.onerror = () => {
+      wrap.innerHTML = `<div class="qr-placeholder">网络异常<br>请检查连接</div>`;
+    };
+    wrap.innerHTML = '';
+    wrap.appendChild(img);
+    urlText.textContent = SITE_URL;
+  }
+</script>
+</body>
+</html>
