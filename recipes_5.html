@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>此身</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Noto+Serif+SC:wght@200;300;400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --grey-1: #111111;
+  --grey-2: #1c1c1c;
+  --grey-3: #2a2a2a;
+  --grey-4: #444444;
+  --grey-5: #888888;
+  --grey-6: #aaaaaa;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 300;
+  cursor: none;
+  overflow-x: hidden;
+}
+.cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--white);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+  mix-blend-mode: difference;
+}
+.cursor.big { width: 36px; height: 36px; }
+.loader {
+  position: fixed; inset: 0;
+  background: var(--black);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease;
+}
+.loader-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.4em;
+  color: var(--grey-4);
+  text-transform: uppercase;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.loader.done { opacity: 0; pointer-events: none; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+header {
+  padding: 6rem 6rem 4rem;
+  border-bottom: 1px solid var(--grey-3);
+  opacity: 0;
+  animation: fadeUp 1s ease 0.6s forwards;
+}
+.header-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.35em;
+  color: var(--grey-4);
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+}
+.header-body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(4rem, 9vw, 8.5rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+h1 em { font-style: italic; color: var(--grey-5); display: block; }
+.header-note {
+  font-size: 0.72rem;
+  color: var(--grey-5);
+  line-height: 1.9;
+  font-weight: 200;
+  letter-spacing: 0.04em;
+  text-align: right;
+  max-width: 180px;
+}
+nav {
+  display: flex;
+  align-items: center;
+  padding: 0 6rem;
+  border-bottom: 1px solid var(--grey-3);
+  opacity: 0;
+  animation: fadeUp 1s ease 0.8s forwards;
+}
+.nav-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--grey-5);
+  padding: 1.5rem 0;
+  margin-right: 3rem;
+  cursor: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: none;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-btn:hover { color: var(--white); }
+.nav-btn.active { color: var(--white); border-bottom-color: var(--white); }
+.nav-count {
+  margin-left: auto;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--grey-4);
+}
+.add-btn {
+  margin-left: 2rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  padding: 0.5rem 1.2rem;
+  cursor: none;
+  transition: background 0.2s;
+}
+.add-btn:hover { background: var(--grey-6); }
+.section { display: none; animation: fadeUp 0.5s ease forwards; }
+.section.visible { display: block; }
+.sec-header {
+  padding: 2.5rem 6rem 2rem;
+  border-bottom: 1px solid var(--grey-3);
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+}
+.sec-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.8rem;
+  font-style: italic;
+  color: var(--grey-5);
+}
+.sec-line { flex: 1; height: 1px; background: var(--grey-3); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.card {
+  border-right: 1px solid var(--grey-3);
+  border-bottom: 1px solid var(--grey-3);
+  padding: 2.5rem 3rem;
+  cursor: none;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s;
+}
+.card:nth-child(3n) { border-right: none; }
+.card:hover { background: var(--grey-1); }
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: var(--white);
+  transition: width 0.4s ease;
+}
+.card:hover::after { width: 100%; }
+.card-idx {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: var(--grey-4);
+  margin-bottom: 2rem;
+}
+.card-name {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 0.3rem;
+}
+.card-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--grey-5);
+  margin-bottom: 2rem;
+}
+.card-attrs { display: flex; gap: 2rem; flex-wrap: wrap; }
+.card-attr {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  color: var(--grey-4);
+  text-transform: uppercase;
+}
+.card-attr span {
+  display: block;
+  color: var(--grey-6);
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+}
+.card-arrow {
+  position: absolute;
+  bottom: 1.8rem; right: 2.2rem;
+  font-size: 0.7rem;
+  color: var(--grey-4);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s, transform 0.2s;
+  font-family: 'Share Tech Mono', monospace;
+}
+.card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+.empty-msg {
+  grid-column: 1/-1;
+  padding: 5rem 6rem;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--grey-3);
+}
+/* DETAIL */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 500;
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+.detail-panel {
+  width: 52%;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 5rem 5rem 5rem 6rem;
+  border-right: 1px solid var(--grey-3);
+  transform: translateX(-24px);
+  transition: transform 0.35s ease;
+}
+.overlay.open .detail-panel { transform: translateX(0); }
+.detail-close-zone { flex: 1; cursor: none; }
+.d-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--grey-4);
+  margin-bottom: 1.5rem;
+}
+.d-title {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.0;
+  margin-bottom: 0.4rem;
+}
+.d-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--grey-5);
+  margin-bottom: 2.5rem;
+}
+.d-attrs {
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 2.5rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--grey-3);
+}
+.d-attr {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.15em;
+  color: var(--grey-4);
+  text-transform: uppercase;
+}
+.d-attr span {
+  display: block;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.8rem;
+  color: var(--white);
+  margin-top: 0.4rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+.d-sec-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--grey-4);
+  margin-bottom: 1.2rem;
+}
+.d-ing {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--grey-2);
+  font-size: 0.82rem;
+  font-weight: 300;
+}
+.d-ing:last-child { border-bottom: none; }
+.d-ing-amt {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--grey-5);
+}
+.d-ing-cat {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey-4);
+  margin-top: 1.4rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--grey-2);
+}
+.d-step {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.4rem;
+  font-size: 0.82rem;
+  line-height: 1.85;
+  font-weight: 300;
+}
+.d-step-n {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--grey-3);
+  line-height: 1.3;
+  min-width: 1.2rem;
+}
+.d-notes {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--grey-3);
+  font-size: 0.78rem;
+  color: var(--grey-5);
+  line-height: 1.95;
+  font-style: italic;
+  font-weight: 200;
+}
+.d-section { margin-bottom: 2.5rem; }
+/* FORM */
+.form-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.97);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.form-overlay.open { opacity: 1; pointer-events: all; }
+.form-box {
+  width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  border: 1px solid var(--grey-3);
+  padding: 3rem;
+  transform: translateY(16px);
+  transition: transform 0.3s;
+}
+.form-overlay.open .form-box { transform: translateY(0); }
+.form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2.5rem;
+}
+.form-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+.form-x {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--grey-4);
+  background: none;
+  border: none;
+  cursor: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.form-x:hover { color: var(--white); }
+.f-lbl {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--grey-4);
+  margin-bottom: 0.5rem;
+}
+.f-in, .f-sel, .f-ta {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--grey-3);
+  color: var(--white);
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  padding: 0.6rem 0;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 1.8rem;
+}
+.f-in:focus, .f-sel:focus, .f-ta:focus { border-color: var(--white); }
+.f-sel { cursor: none; }
+.f-sel option { background: var(--black); }
+.f-ta { resize: vertical; min-height: 68px; }
+.f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.f-sub { width: 100%; background: var(--white); color: var(--black); border: none;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em;
+  text-transform: uppercase; padding: 0.9rem; cursor: none; margin-top: 0.5rem; transition: background 0.2s; }
+.f-sub:hover { background: var(--grey-6); }
+@media (max-width: 900px) {
+  header, nav { padding-left: 2rem; padding-right: 2rem; }
+  h1 { font-size: 4rem; }
+  .header-note { display: none; }
+  .grid { grid-template-columns: 1fr; }
+  .card { border-right: none; }
+  .detail-panel { width: 100%; padding: 3rem 2rem; }
+  .sec-header { padding: 2rem; }
+  .form-box { width: 92%; padding: 2rem; }
+  .f-row { grid-template-columns: 1fr; gap: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="loader" id="loader"><div class="loader-text">Loading —</div></div>
+
+<header>
+  <div class="header-eyebrow">此身 · Personal Archive</div>
+  <div class="header-body">
+    <h1>此身<em>在此</em></h1>
+    <div class="header-note">既无所凭<br>仍在此身</div>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="showSec('all',this)">全部</button>
+  <button class="nav-btn" onclick="showSec('food',this)">食谱</button>
+  <button class="nav-btn" onclick="showSec('cocktail',this)">调酒</button>
+  <button class="nav-btn" onclick="showSec('dessert',this)">甜品</button>
+  <span class="nav-count" id="navCount">— 0</span>
+  <button class="add-btn" onclick="openForm()">+ 添加配方</button>
+</nav>
+
+<div class="section visible" id="sec-all"><div class="grid" id="grid-all"></div></div>
+<div class="section" id="sec-food">
+  <div class="sec-header"><div class="sec-title">食谱</div><div class="sec-line"></div></div>
+  <div class="grid" id="grid-food"></div>
+</div>
+<div class="section" id="sec-cocktail">
+  <div class="sec-header"><div class="sec-title">调酒</div><div class="sec-line"></div></div>
+  <div class="grid" id="grid-cocktail"></div>
+</div>
+<div class="section" id="sec-dessert">
+  <div class="sec-header"><div class="sec-title">甜品</div><div class="sec-line"></div></div>
+  <div class="grid" id="grid-dessert"></div>
+</div>
+
+<!-- Detail -->
+<div class="overlay" id="detailOverlay" onclick="overlayClick(event)">
+  <div class="detail-panel" id="detailPanel"></div>
+  <div class="detail-close-zone"></div>
+</div>
+
+<!-- Form -->
+<div class="form-overlay" id="formOverlay" onclick="formOverlayClick(event)">
+  <div class="form-box">
+    <div class="form-head">
+      <div class="form-title">新配方</div>
+      <button class="form-x" onclick="closeForm()">关闭 ×</button>
+    </div>
+    <label class="f-lbl">配方名称</label>
+    <input class="f-in" id="fName" placeholder="名称">
+    <label class="f-lbl">副标题（英文或注释，可选）</label>
+    <input class="f-in" id="fSub" placeholder="Subtitle">
+    <label class="f-lbl">分类</label>
+    <select class="f-sel" id="fType" onchange="updateLabels()">
+      <option value="food">食谱</option>
+      <option value="cocktail">调酒</option>
+      <option value="dessert">甜品</option>
+    </select>
+    <div class="f-row">
+      <div><label class="f-lbl" id="lA1">难度</label><input class="f-in" id="fA1" placeholder="简单 / 中等 / 困难"></div>
+      <div><label class="f-lbl" id="lA2">时间</label><input class="f-in" id="fA2" placeholder="30分钟"></div>
+    </div>
+    <label class="f-lbl" id="lA3">份量</label>
+    <input class="f-in" id="fA3" placeholder="2人份">
+    <label class="f-lbl">食材 / 原料（每行一条，中文逗号分隔名称和用量）</label>
+    <textarea class="f-ta" id="fIng" placeholder="大虾，300g&#10;黄油，40g&#10;大蒜，6瓣"></textarea>
+    <label class="f-lbl">步骤（每行一步）</label>
+    <textarea class="f-ta" id="fSteps" placeholder="热锅融化黄油&#10;放入蒜末炒香&#10;加入大虾翻炒至变色"></textarea>
+    <label class="f-lbl">备注 / 心得（可选）</label>
+    <textarea class="f-ta" id="fNotes" placeholder="第一次的感受，下次想改进的地方…" style="min-height:52px"></textarea>
+    <button class="f-sub" onclick="saveRecipe()">保存配方</button>
+  </div>
+</div>
+
+<script>
+// cursor
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px'; });
+function addHover(el) {
+  el.addEventListener('mouseenter', () => cur.classList.add('big'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+}
+document.querySelectorAll('button').forEach(addHover);
+
+// loader
+window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('done'), 700));
+
+// data
+const typeMap = { food:'食谱', cocktail:'调酒', dessert:'甜品' };
+const attrMap = {
+  food: ['难度','时间','份量'],
+  cocktail: ['杯型','手法','酒精度'],
+  dessert: ['难度','时间','份量'],
+};
+
+let data = [
+  { type:'food', name:'蒜香黄油大虾', sub:'Garlic Butter Shrimp',
+    attrs:[{k:'难度',v:'简单'},{k:'时间',v:'15分钟'},{k:'份量',v:'2人'}],
+    ing:{
+      '肉 / 海鲜':[{n:'大虾',a:'300g'}],
+      '辅料':[{n:'大蒜',a:'6瓣'},{n:'欧芹',a:'适量'}],
+      '调味料':[{n:'无盐黄油',a:'40g'},{n:'白葡萄酒',a:'2大勺'},{n:'柠檬汁',a:'半个柠檬'},{n:'盐、黑胡椒',a:'适量'}],
+    },
+    steps:['大虾去壳挑线，盐和黑胡椒腌制5分钟。','热锅放入黄油，加蒜末炒香30秒。','放入大虾，每面煎1分钟，倒入白葡萄酒。','加剩余黄油，挤入柠檬汁，翻炒出锅撒欧芹。'],
+    notes:'虾变色即可，过火会变老。白葡萄酒可用鸡汤代替。' },
+
+  { type:'food', name:'红酒炖牛肉', sub:'Boeuf Bourguignon',
+    attrs:[{k:'难度',v:'中等'},{k:'时间',v:'3小时'},{k:'份量',v:'4人'}],
+    ing:{
+      '肉 / 海鲜':[{n:'牛腩',a:'800g'},{n:'培根',a:'100g'}],
+      '辅料':[{n:'洋葱',a:'2个'},{n:'胡萝卜',a:'2根'},{n:'蘑菇',a:'200g'},{n:'大蒜',a:'4瓣'},{n:'百里香、月桂叶',a:'适量'}],
+      '调味料':[{n:'红酒',a:'500ml'},{n:'牛骨汤',a:'300ml'},{n:'面粉',a:'1大勺'},{n:'盐、黑胡椒',a:'适量'}],
+    },
+    steps:['牛腩切块，用红酒和百里香腌制一夜。','培根煸出油脂捞出，牛肉分批煎至焦褐。','炒软洋葱蒜和胡萝卜，加面粉翻炒。','倒入红酒和牛骨汤，小火炖2小时。','最后半小时放蘑菇，收汁至浓稠。'],
+    notes:'提前一天腌制效果最佳。铸铁锅炖味道更好。配土豆泥是经典。' },
+
+  { type:'cocktail', name:'烟熏 Martini', sub:'Smoked Martini · stir',
+    attrs:[{k:'杯型',v:'马提尼杯'},{k:'手法',v:'Stir'},{k:'酒精度',v:'极高'}],
+    ing:{
+      '基酒':[{n:'法穆金酒',a:'45ml'},{n:'诗洛珂伏特加',a:'30ml'},{n:'阿贝10年',a:'3ml'}],
+      '加强酒 / 苦精':[{n:'诺利帕特干味美思',a:'5ml'},{n:'橙味苦精',a:'1 dash'}],
+      '装饰':[{n:'橙皮',a:'喷香'}],
+    },
+    steps:['调酒杯加满冰，依次倒入所有酒液。','充分搅拌至冰冷，约40秒。','滤入冰镇马提尼杯。','橙皮朝杯口挤压喷香油，沿杯沿擦一圈后丢弃或挂边。'],
+    notes:'阿贝10年用量极少，只取烟熏香气，不可多加。诺利帕特要冷藏保存。务必 stir 不要 shake，保持酒体清澈透亮。' },
+
+  { type:'cocktail', name:'Sazerac', sub:'萨泽拉克 · stir',
+    attrs:[{k:'杯型',v:'老式杯'},{k:'手法',v:'Stir'},{k:'酒精度',v:'高'}],
+    ing:{
+      '基酒':[{n:'干邑白兰地',a:'30ml'},{n:'黑麦威士忌',a:'30ml'}],
+      '苦精':[{n:'佩乔苦精',a:'5 dash'},{n:'安哥苦精',a:'3 dash'}],
+      '调味':[{n:'糖浆',a:'3ml'}],
+      '装饰':[{n:'柠檬皮',a:'喷香（不入杯）'}],
+    },
+    steps:['老式杯加冰预冷备用。','另取调酒杯加冰，倒入白兰地、黑麦、苦精和糖浆，充分搅拌。','倒掉老式杯中的冰，滤入酒液。','柠檬皮朝杯口喷香后丢弃，不放入杯中。'],
+    notes:'正宗Sazerac不加冰直饮，杯子要提前预冷。柠檬皮只取香气，传统做法不留在杯里。佩乔苦精是灵魂，不可替换。' },
+
+  { type:'cocktail', name:'新加坡司令', sub:'Singapore Sling · shake',
+    attrs:[{k:'杯型',v:'飓风杯'},{k:'手法',v:'Shake'},{k:'酒精度',v:'中'}],
+    ing:{
+      '基酒':[{n:'金酒',a:'45ml'}],
+      '利口酒':[{n:'希林樱桃利口酒',a:'5ml'},{n:'君度',a:'5ml'},{n:'DOM本尼狄克汀',a:'7.5ml'}],
+      '果汁 / 糖':[{n:'菠萝汁',a:'60ml'},{n:'柠檬汁',a:'10ml'},{n:'红石榴糖浆',a:'3ml'}],
+      '苦精 / 装饰':[{n:'安哥苦精',a:'2 dash'},{n:'菠萝块',a:'1块'}],
+    },
+    steps:['将所有材料加冰摇和至充分冷却。','滤入装满冰块的飓风杯。','菠萝块装饰杯沿。'],
+    notes:'菠萝汁比例是这杯酒的关键，新鲜菠萝汁更佳。各利口酒用量要精准，否则甜度失衡。' },
+
+  { type:'cocktail', name:'Aperol Spritz', sub:'阿佩罗气泡 · build',
+    attrs:[{k:'杯型',v:'气泡酒杯'},{k:'手法',v:'Build'},{k:'酒精度',v:'低'}],
+    ing:{
+      '基酒':[{n:'Aperol',a:'2/3杯'}],
+      '气泡':[{n:'普罗塞克起泡酒',a:'1/6杯'},{n:'苏打水',a:'1/6杯'}],
+      '装饰':[{n:'橙子片',a:'1片'}],
+    },
+    steps:['大号气泡酒杯加满冰块。','按顺序倒入Aperol、普罗塞克、苏打水。','轻轻搅拌一下，放入橙片装饰。'],
+    notes:'比例是这杯酒的全部，3:2:1（Aperol:普罗塞克:苏打）是经典。不要过度搅拌，保留气泡。' },
+
+  { type:'cocktail', name:'Old Fashioned', sub:'古典鸡尾酒 · stir',
+    attrs:[{k:'杯型',v:'老式杯'},{k:'手法',v:'Stir'},{k:'酒精度',v:'高'}],
+    ing:{
+      '基酒':[{n:'爱威廉斯白标波本',a:'30ml'},{n:'瑞顿房黑麦威士忌',a:'20ml'}],
+      '苦精 / 调味':[{n:'安哥苦精',a:'5 dash'},{n:'糖浆',a:'3ml'},{n:'君度',a:'3ml'},{n:'苏打水',a:'少许'}],
+      '装饰':[{n:'橙片',a:'1片'}],
+    },
+    steps:['老式杯中加入糖浆、苦精、君度，加少许苏打水轻搅溶化。','加入大冰块，倒入两款威士忌。','充分搅拌至冰冷，橙片装饰。'],
+    notes:'两款威士忌混用增加层次感：波本带甜，黑麦带辛辣。苏打水只用几滴帮助糖溶化，不是加满。' },
+
+  { type:'cocktail', name:'教父', sub:'The Godfather · stir',
+    attrs:[{k:'杯型',v:'老式杯'},{k:'手法',v:'Stir'},{k:'酒精度',v:'高'}],
+    ing:{
+      '基酒':[{n:'黑方Double Black威士忌',a:'50ml'},{n:'拉弗格单一麦芽',a:'10ml'}],
+      '利口酒':[{n:'杏仁利口酒（Amaretto）',a:'15ml'}],
+    },
+    steps:['老式杯加大冰块。','依次倒入所有酒液，轻柔搅拌均匀。','无需装饰，直接饮用。'],
+    notes:'拉弗格的泥煤烟熏与杏仁甜香形成强烈对比，是这杯酒的魅力所在。搅拌轻柔，不要过度稀释。' },
+
+  { type:'cocktail', name:'Gimlet', sub:'金菲士 · shake',
+    attrs:[{k:'杯型',v:'鸡尾酒杯'},{k:'手法',v:'Shake'},{k:'酒精度',v:'中高'}],
+    ing:{
+      '基酒':[{n:'哥顿金酒',a:'45ml'}],
+      '调味':[{n:'新鲜柠檬汁',a:'15ml'},{n:'糖浆',a:'3ml'}],
+    },
+    steps:['所有材料加冰摇和至充分冰冷。','双重过滤倒入冰镇鸡尾酒杯。'],
+    notes:'配方极简，食材质量至关重要。柠檬汁必须现榨，瓶装无法替代。哥顿金酒植物香与柠檬的平衡是重点，糖浆微调酸甜比。' },
+
+  { type:'cocktail', name:'Deluge 威士忌酸', sub:'Deluge Whiskey Sour · shake',
+    attrs:[{k:'杯型',v:'酸酒杯'},{k:'手法',v:'Shake'},{k:'酒精度',v:'中'}],
+    ing:{
+      '基酒':[{n:'Jameson爱尔兰威士忌',a:'60ml'}],
+      '调味':[{n:'新鲜柠檬汁',a:'20ml'},{n:'糖浆',a:'5ml'}],
+      '装饰':[{n:'樱桃',a:'1颗'}],
+    },
+    steps:['所有材料加冰摇和，充分冷却。','滤入酸酒杯，樱桃沉底装饰。'],
+    notes:'Jameson柔和的爱尔兰风格让这杯酸酒比波本版本更圆润易饮。柠檬汁用量偏多，偏酸风格，可按喜好微调糖浆。' },
+
+  { type:'cocktail', name:'长岛冰茶', sub:'Long Island Iced Tea · shake',
+    attrs:[{k:'杯型',v:'可林杯'},{k:'手法',v:'Shake'},{k:'酒精度',v:'极高'}],
+    ing:{
+      '基酒':[{n:'金酒',a:'15ml'},{n:'朗姆酒',a:'15ml'},{n:'伏特加',a:'15ml'},{n:'龙舌兰',a:'15ml'}],
+      '利口酒 / 调味':[{n:'君度',a:'15ml'},{n:'柠檬汁',a:'15ml'}],
+      '收尾':[{n:'可乐',a:'补满'},{n:'菲奈特',a:'少许（可选）'}],
+    },
+    steps:['将所有基酒、君度和柠檬汁加冰摇和。','滤入装满冰块的可林杯。','顺着杯沿缓缓注入可乐，保留分层，轻搅。','菲奈特点缀在表面。'],
+    notes:'外表像冰茶，实际酒精极高，不要被外表迷惑。菲奈特是点睛之笔，带来草本苦香，不加也成立。可乐慢倒保留气泡。' },
+
+  { type:'cocktail', name:'Negroni', sub:'内格罗尼 · stir',
+    attrs:[{k:'杯型',v:'老式杯'},{k:'手法',v:'Stir'},{k:'酒精度',v:'高'}],
+    ing:{
+      '基酒':[{n:'添加利10号金酒',a:'45ml'}],
+      '利口酒 / 味美思':[{n:'园林红味美思',a:'20ml'},{n:'福门红味美思',a:'10ml'},{n:'金巴利',a:'7ml'}],
+      '装饰':[{n:'橙皮',a:'1条'},{n:'大冰球',a:'1个'}],
+    },
+    steps:['调酒杯加满冰，倒入所有酒液。','顺时针搅拌40秒至充分降温。','老式杯放大冰球，滤入酒液。','橙皮挤压喷香油后挂在杯沿。'],
+    notes:'双味美思配方（园林+福门）比单一味美思层次更丰富。金巴利用量减少，更平衡不苦涩。添加利10号柑橘香与配方高度契合。' },
+
+  { type:'cocktail', name:'金汤力', sub:'Gin & Tonic · build',
+    attrs:[{k:'杯型',v:'气泡酒杯'},{k:'手法',v:'Build'},{k:'酒精度',v:'中'}],
+    ing:{
+      '基酒':[{n:'添加利10号金酒',a:'45ml'}],
+      '调味':[{n:'柠檬汁',a:'1吧勺'},{n:'苦精',a:'4滴'}],
+      '收尾':[{n:'汤力水',a:'主体'},{n:'苏打水',a:'少量补充'}],
+      '装饰':[{n:'青柠皮',a:'喷香'}],
+    },
+    steps:['气泡酒杯加满冰，倒入金酒和柠檬汁。','加入苦精4滴。','缓缓注入汤力水，苏打水补充至满，轻搅一下。','青柠皮朝杯口挤压喷香后放入杯中。'],
+    notes:'汤力水慢倒保留气泡。苦精是区别普通G&T的关键细节。青柠皮喷香后放入，持续释放香气。' },
+
+  { type:'food', name:'辣子鸡', sub:'Spicy Crispy Chicken',
+    attrs:[{k:'难度',v:'中等'},{k:'时间',v:'45分钟'},{k:'份量',v:'2人'}],
+    ing:{
+      '肉 / 海鲜':[{n:'手枪鸡腿',a:'2个 约700g'}],
+      '辅料':[{n:'灯笼椒',a:'30g'},{n:'子弹头辣椒',a:'30g'},{n:'花生米',a:'100g'},{n:'姜',a:'25g'},{n:'蒜',a:'6粒 约25g'},{n:'葱',a:'20g'},{n:'青花椒',a:'3g'},{n:'红花椒',a:'3g'}],
+      '腌制调料':[{n:'盐',a:'3g'},{n:'胡椒粉',a:'1g'},{n:'鸡精',a:'5g'},{n:'味精',a:'5g'},{n:'黄酒',a:'20g'},{n:'老抽',a:'5g'},{n:'食用油',a:'40g'}],
+      '收尾粉料':[{n:'十三香',a:'3g'},{n:'鸡精',a:'3g'},{n:'味精',a:'5g'},{n:'白糖',a:'10g'},{n:'白芝麻',a:'10g'},{n:'芝麻香油',a:'10g'},{n:'花椒油',a:'15g'}],
+    },
+    steps:[
+      '鸡腿沿骨头剔肉，切宽条再切丁（大拇指第一关节大小），清水浸泡10分钟，洗净攥干，厨房纸吸水。',
+      '花生米喷油，空气炸锅180°C炸6-8分钟至酥脆备用。',
+      '辣椒剪成段：灯笼椒30g＋子弹头30g。姜蒜切片，葱切段。',
+      '鸡丁加盐、胡椒粉、鸡精、味精、黄酒、老抽抓至起胶，最后加食用油40g抓匀腌制。',
+      '锅中多油烧热至冒烟，鸡丁抓散下锅，大火30秒不动定型，再翻炒搅散，炸约2分半捞出。',
+      '油温升至比第一次更高冒烟，复炸鸡块60-90秒，边炸边抖动，捞出沥油。',
+      '锅留底油，下姜蒜片、花椒粒、辣椒段大火翻炒，闻香后转最小火炒90秒至2分钟，辣椒段逐渐变黄发白、有沙沙声。',
+      '倒入鸡丁、粉料（十三香、鸡精、味精、白糖、白芝麻），加花生米，最小火翻炒均匀，加葱段、芝麻香油、花椒油翻匀关火出锅。',
+    ],
+    notes:'鸡丁一定要吸干水分再腌，否则炸不脆。复炸是酥脆的关键，不能省。辣椒炒至沙沙声才算到位，火候不够会发苦。粉料最后放，防止糊锅。' },
+
+  { type:'dessert', name:'提拉米苏', sub:'Tiramisu',
+    attrs:[{k:'难度',v:'中等'},{k:'时间',v:'3小时+冷藏'},{k:'份量',v:'6人'}],
+    ing:{
+      '炸蛋面糊':[{n:'白砂糖',a:'60g'},{n:'水',a:'20g（熬糖浆至116-120°C）'},{n:'蛋黄',a:'2-3个'}],
+      '主体':[{n:'马斯卡彭',a:'250g'},{n:'淡奶油',a:'200g'},{n:'利口酒',a:'2小勺'}],
+      '组装':[{n:'手指饼干',a:'适量'},{n:'浓缩咖啡',a:'适量（浸泡用）'},{n:'可可粉',a:'适量（表面撒）'}],
+    },
+    steps:[
+      '白砂糖和水入锅，熬至116-120°C糖浆。',
+      '蛋黄打发，边搅拌边缓缓倒入热糖浆，持续打发至颜色变浅、体积膨大、冷却至室温。',
+      '马斯卡彭搅打顺滑，加入蛋黄糊翻拌均匀。',
+      '淡奶油打发至七八分，加入马斯卡彭蛋黄糊中翻拌，加入利口酒拌匀。',
+      '手指饼干快速蘸取浓缩咖啡，铺入容器底部。',
+      '倒入一层面糊，再铺一层饼干，再倒面糊，重复至容器填满。',
+      '冷藏至少4小时，食用前撒可可粉。',
+    ],
+    notes:'糖浆温度要准确，过低蛋黄不够稳定，过高会结块。手指饼干蘸咖啡要快，太湿会烂。利口酒推荐 Marsala 或 Kahlúa。' },
+
+  { type:'dessert', name:'焦糖布丁', sub:'Crème Caramel',
+    attrs:[{k:'难度',v:'中等'},{k:'时间',v:'2小时+冷藏'},{k:'份量',v:'4人'}],
+    ing:{
+      '焦糖层':[{n:'砂糖',a:'40g'},{n:'水',a:'15g'}],
+      '布丁体':[{n:'牛奶',a:'200g'},{n:'奶油',a:'100g'},{n:'奶油奶酪',a:'100g'},{n:'鸡蛋',a:'4个'},{n:'白砂糖',a:'20g'},{n:'炼乳',a:'60g'},{n:'香草精',a:'少许'}],
+    },
+    steps:[
+      '砂糖加水小火熬至深琥珀色焦糖，迅速倒入模具底部，晃匀冷却凝固。',
+      '奶油奶酪加白砂糖打至顺滑，加入炼乳、香草精拌匀。',
+      '牛奶和奶油混合加热至微温，缓缓加入鸡蛋搅匀，再加入奶酪糊，过筛。',
+      '蛋奶液倒入模具，水浴150°C烤约45-50分钟至凝固。',
+      '冷却后冷藏至少4小时，倒扣脱模。',
+    ],
+    notes:'焦糖熬到深琥珀色，颜色浅会太甜。蛋奶液必须过筛，口感更嫩滑。水浴烤制防止表面开裂。' },
+
+  { type:'dessert', name:'酥皮泡芙', sub:'Choux au Craquelin',
+    attrs:[{k:'难度',v:'较难'},{k:'时间',v:'2.5小时'},{k:'份量',v:'12-14个'}],
+    ing:{
+      '酥皮':[{n:'软化无盐黄油',a:'45g'},{n:'糖粉',a:'30g'},{n:'低筋面粉',a:'50g'}],
+      '泡芙面糊':[{n:'牛奶',a:'85g'},{n:'无盐黄油',a:'40g'},{n:'白砂糖',a:'5g'},{n:'盐',a:'1g'},{n:'低筋面粉',a:'55g'},{n:'鸡蛋',a:'约2个（按状态添加）'}],
+      '香草卡仕达馅':[{n:'蛋黄',a:'2个'},{n:'牛奶',a:'280g'},{n:'糖',a:'40g'},{n:'玉米淀粉',a:'15g'},{n:'香草荚',a:'1/2个或香草精3滴'},{n:'无盐黄油',a:'10g'},{n:'淡奶油',a:'175g'}],
+    },
+    steps:[
+      '酥皮：黄油、糖粉、面粉混合揉成团，擀成薄片，冷冻备用，用圆模切出与泡芙等大的圆片。',
+      '面糊：牛奶、黄油、糖、盐入锅煮沸，倒入面粉快速搅拌成团，小火翻炒至锅底出现薄膜，离火。',
+      '面团稍凉后分次加入蛋液，每次充分搅拌，至提起刮刀面糊呈倒三角缓缓滑落为止（不一定用完所有蛋液）。',
+      '面糊装入裱花袋，挤在铺烘焙纸的烤盘上，每个上方覆盖一片酥皮圆片。',
+      '190°C烤15分钟，转175°C烤10分钟，转150°C烤10-13分钟至内部烤干。',
+      '卡仕达馅：蛋黄加糖、淀粉搅匀，牛奶加香草煮沸后缓缓倒入，回锅搅拌至浓稠，加黄油，贴面覆保鲜膜冷藏。',
+      '淡奶油打发后与冷却的卡仕达酱混合，装入裱花袋，从泡芙底部挤入馅料即可。',
+    ],
+    notes:'面团炒制要充分，面粉糊化才能吸收足够蛋液。烤盘用烘焙纸不用硅胶垫，否则底部凹陷。烤制温度分三段，不能省。泡芙皮可单独密封室温保存，吃前180°C回烤3-5分钟恢复酥脆，再填馅。' },
+
+  { type:'dessert', name:'巴斯克蛋糕', sub:'Basque Burnt Cheesecake',
+    attrs:[{k:'难度',v:'简单'},{k:'时间',v:'1.5小时'},{k:'份量',v:'6寸'}],
+    ing:{
+      '基础配方':[{n:'奶油奶酪',a:'350g'},{n:'白砂糖',a:'90g'},{n:'全蛋',a:'2个'},{n:'蛋黄',a:'1个'},{n:'鲜奶油',a:'150g'},{n:'低筋面粉',a:'10g'}],
+      '可选风味 — 开心果':[{n:'开心果酱',a:'40g（替换部分奶酪）'},{n:'开心果碎',a:'适量（表面装饰）'}],
+      '可选风味 — 抹茶':[{n:'抹茶粉',a:'8-10g'},{n:'白巧克力',a:'20g（可选，增加甜度）'}],
+    },
+    steps:[
+      '奶油奶酪室温软化，加糖打至顺滑无颗粒。',
+      '依次加入全蛋和蛋黄，每次充分搅匀。',
+      '加入鲜奶油搅匀，筛入低筋面粉拌匀。',
+      '开心果版：加入开心果酱拌匀；抹茶版：抹茶粉过筛后加入拌匀。',
+      '模具内铺烘焙纸，倒入面糊，烘焙纸要高出模具边缘。',
+      '230°C烤25-28分钟，表面深焦、中心仍有轻微晃动时出炉。',
+      '室温冷却1小时，冷藏1小时后脱模切块。',
+    ],
+    notes:'巴斯克蛋糕的精髓就是"烤焦"的表面，不要怕颜色深。出炉时中心晃动是正常的，冷却后会凝固。开心果版建议表面撒开心果碎增加质感，抹茶版颜色偏深，属于正常现象。' },
+
+  { type:'dessert', name:'奶冻三味', sub:'Panna Cotta · 三种口味',
+    attrs:[{k:'难度',v:'简单'},{k:'时间',v:'4小时（含冷藏）'},{k:'份量',v:'4人'}],
+    ing:{
+      '茉莉花茶奶冻':[{n:'牛奶',a:'100g'},{n:'茉莉花茶包',a:'1包 约2g'},{n:'淡奶油',a:'60g'},{n:'吉利丁片',a:'2g'},{n:'糖',a:'12g'}],
+      '咖啡奶冻':[{n:'牛奶',a:'100g'},{n:'咖啡液',a:'18g'},{n:'淡奶油',a:'60g'},{n:'吉利丁片',a:'2g'},{n:'糖',a:'14g'}],
+      '蜂蜜奶冻':[{n:'牛奶',a:'85g'},{n:'蜂蜜',a:'17g'},{n:'淡奶油',a:'65g'},{n:'吉利丁片',a:'2g'}],
+    },
+    steps:[
+      '吉利丁片提前用冷水泡软（约5-10分钟）。',
+      '牛奶加糖（和茶包/咖啡液/蜂蜜）小火加热至60-70°C，不要沸腾。',
+      '茶包版：浸泡3-5分钟后取出茶包；咖啡版：加入咖啡液搅匀。',
+      '挤干吉利丁片，加入热牛奶中搅拌至完全融化。',
+      '加入淡奶油搅匀，过筛后倒入模具或杯中。',
+      '室温冷却后冷藏至少3小时至凝固，脱模或直接食用。',
+    ],
+    notes:'吉利丁必须冷水泡发，热水会失效。牛奶不要煮沸，温度过高吉利丁效果变差。三种口味可以同时制作，分层叠放也好看。蜂蜜奶冻不加糖，甜度来自蜂蜜，注意选择风味温和的蜂蜜。' },
+
+  { type:'dessert', name:'巧克力生乳卷', sub:'Chocolate Swiss Roll',
+    attrs:[{k:'难度',v:'中等'},{k:'时间',v:'1.5小时'},{k:'份量',v:'25×25cm一盘'}],
+    ing:{
+      '蛋糕胚':[{n:'蛋白',a:'95g'},{n:'砂糖',a:'42g'},{n:'蛋黄',a:'45g'},{n:'玉米油',a:'40g'},{n:'热牛奶',a:'50g'},{n:'可可粉',a:'18g'},{n:'低筋面粉',a:'45g'}],
+      '香缇奶油':[{n:'淡奶油',a:'150g'},{n:'砂糖',a:'12g'}],
+    },
+    steps:[
+      '玉米油加入可可粉搅匀，加入温热牛奶拌匀，筛入低筋面粉搅匀，加入蛋黄搅匀。',
+      '蛋白分次加入砂糖，打发至小弯钩状（八分发）。',
+      '取1/3蛋白霜加入蛋黄糊翻拌均匀，再倒回剩余蛋白霜中翻拌至无白色纹路。',
+      '面糊倒入铺了烘焙纸的25×25cm烤盘，刮平，165°C烤15分钟。',
+      '出炉后立刻倒扣在新的烘焙纸上，撕去底部烘焙纸，晾凉。',
+      '淡奶油加砂糖打发至七分，均匀涂抹在蛋糕胚上，借助烘焙纸卷起，两端拧紧。',
+      '冷藏2小时定型，切片，表面撒可可粉。',
+    ],
+    notes:'蛋白打至小弯钩不要过发，否则卷的时候容易裂。卷的时候要趁蛋糕胚还有余温，冷透后更容易开裂。奶油不要打太发，七分发更容易涂抹均匀。' },
+
+  { type:'dessert', name:'歌剧院蛋糕', sub:'Opéra Cake',
+    attrs:[{k:'难度',v:'较难'},{k:'时间',v:'半天'},{k:'份量',v:'6寸'}],
+    ing:{
+      '乔孔达蛋糕胚':[{n:'低筋面粉',a:'32g'},{n:'杏仁粉',a:'50g'},{n:'糖粉',a:'40g'},{n:'白砂糖',a:'20g'},{n:'全蛋',a:'2个'},{n:'蛋清',a:'65g'},{n:'黄油',a:'17g'}],
+      '咖啡甘纳许':[{n:'蛋黄',a:'60g'},{n:'白砂糖（蛋黄用）',a:'50g'},{n:'牛奶',a:'75g'},{n:'白砂糖（牛奶用）',a:'20g'},{n:'黄油',a:'130g'},{n:'浓缩咖啡',a:'1份'},{n:'香草精',a:'适量'}],
+    },
+    steps:[
+      '蛋糕胚：杏仁粉、糖粉、全蛋打发，加入融化黄油。蛋清加白砂糖打发至硬性，与杏仁糊翻拌，筛入面粉拌匀，薄摊烤盘，180°C烤8-10分钟。',
+      '咖啡甘纳许：蛋黄加糖打发，牛奶加糖煮沸后缓缓倒入蛋黄，回锅85°C搅拌至浓稠，过筛冷却。加入软化黄油打发，加浓缩咖啡拌匀。',
+      '组装：蛋糕胚刷浓缩咖啡糖浆，铺一层咖啡甘纳许，叠第二层蛋糕胚，再刷咖啡糖浆，再铺甘纳许，叠第三层。',
+      '表面浇镜面巧克力淋面，冷藏至少2小时凝固，切边整齐后上桌。',
+    ],
+    notes:'乔孔达蛋糕胚要薄，烤出来才够细腻。咖啡糖浆要充分浸透每层蛋糕胚，是湿润感的来源。切片前刀要加热，切面才整齐。层次越分明，视觉效果越好。' },
+
+  { type:'food', name:'酸菜水煮鱼', sub:'Sauerkraut Poached Fish',
+    attrs:[{k:'难度',v:'中等'},{k:'时间',v:'40分钟'},{k:'份量',v:'3-4人'}],
+    ing:{
+      '肉 / 海鲜':[{n:'生鱼',a:'1条 约3斤'}],
+      '辅料':[{n:'酸菜',a:'500g'},{n:'红泡椒',a:'100g'},{n:'生姜',a:'约50g'},{n:'大蒜',a:'约80g'},{n:'葱花、香菜',a:'适量'},{n:'鸡蛋清',a:'1个'},{n:'土豆淀粉',a:'1小把'}],
+      '调味料':[{n:'菜籽油',a:'1小碗'},{n:'猪油',a:'适量'},{n:'豆瓣酱',a:'适量'},{n:'黄酒',a:'适量'},{n:'盐',a:'适量'},{n:'白糖',a:'半勺'},{n:'胡椒粉',a:'1勺'},{n:'生抽',a:'适量'},{n:'晒醋',a:'少许'}],
+      '泼油':[{n:'菜籽油',a:'1碗'},{n:'大蒜',a:'适量'},{n:'青红花椒',a:'适量'},{n:'干辣椒',a:'适量'}],
+    },
+    steps:['鱼片成薄片，鱼骨斩块；鱼片加盐、蛋清、土豆淀粉抓匀腌制10分钟。','酸菜切段，姜蒜切片备用。','锅中菜籽油加猪油烧热，下姜蒜、红泡椒、豆瓣酱炒香出红油。','加入酸菜翻炒出香，加足量热水烧开，先下鱼骨煮3-4分钟。','鱼片逐片下锅，加黄酒、白糖、胡椒粉、生抽调味，鱼片变白即关火，加少许晒醋提鲜。','盛入大碗，铺葱花、香菜、蒜片、花椒和干辣椒。','菜籽油烧至高温冒烟，均匀泼在配料上，激出香气即成。'],
+    notes:'鱼片要薄且均匀，蛋清和淀粉让鱼片嫩滑不散。酸菜要充分炒香才够味。晒醋少许提鲜，不能多。泼油温度要够高是香气关键。辣椒花椒用量按个人口味调整。' },
+];
+
+function pad(n) { return String(n).padStart(3,'0'); }
+
+function makeCard(r, idx) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `
+    <div class="card-idx">${typeMap[r.type]} — ${pad(idx+1)}</div>
+    <div class="card-name">${r.name}</div>
+    <div class="card-sub">${r.sub||''}</div>
+    <div class="card-attrs">${r.attrs.map(a=>`<div class="card-attr">${a.k}<span>${a.v}</span></div>`).join('')}</div>
+    <div class="card-arrow">→</div>`;
+  div.onclick = () => openDetail(idx);
+  addHover(div);
+  return div;
+}
+
+function render() {
+  ['all','food','cocktail','dessert'].forEach(t => document.getElementById('grid-'+t).innerHTML = '');
+  data.forEach((r,i) => {
+    document.getElementById('grid-all').appendChild(makeCard(r,i));
+    document.getElementById('grid-'+r.type).appendChild(makeCard(r,i));
+  });
+  ['food','cocktail','dessert'].forEach(t => {
+    const g = document.getElementById('grid-'+t);
+    if (!g.children.length) g.innerHTML = '<div class="empty-msg">暂无配方</div>';
+  });
+  document.getElementById('navCount').textContent = `— ${data.length}`;
+}
+
+function showSec(id, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  const sec = document.getElementById('sec-'+id);
+  sec.style.animation = 'none'; void sec.offsetWidth; sec.style.animation = '';
+  sec.classList.add('visible');
+}
+
+function openDetail(idx) {
+  const r = data[idx];
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="d-tag">${typeMap[r.type]} — ${pad(idx+1)}</div>
+    <div class="d-title">${r.name}</div>
+    <div class="d-sub">${r.sub||''}</div>
+    <div class="d-attrs">${r.attrs.map(a=>`<div class="d-attr">${a.k}<span>${a.v}</span></div>`).join('')}</div>
+    <div class="d-section">
+      <div class="d-sec-label">食材 / 原料</div>
+      ${Array.isArray(r.ing)
+        ? r.ing.map(i=>`<div class="d-ing"><span>${i.n}</span><span class="d-ing-amt">${i.a}</span></div>`).join("")
+        : Object.entries(r.ing).map(([cat,items])=>
+            `<div class="d-ing-cat">${cat}</div>`+items.map(i=>`<div class="d-ing"><span>${i.n}</span><span class="d-ing-amt">${i.a}</span></div>`).join("")
+          ).join("")
+      }
+    </div>
+    <div class="d-section">
+      <div class="d-sec-label">步骤</div>
+      ${r.steps.map((s,i)=>`<div class="d-step"><span class="d-step-n">${i+1}</span><span>${s}</span></div>`).join('')}
+    </div>
+    ${r.notes?`<div class="d-notes">${r.notes}</div>`:''}`;
+  document.getElementById('detailOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function overlayClick(e) {
+  if (e.target.classList.contains('overlay') || e.target.classList.contains('detail-close-zone')) {
+    document.getElementById('detailOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+function updateLabels() {
+  const t = document.getElementById('fType').value;
+  const ls = attrMap[t];
+  document.getElementById('lA1').textContent = ls[0];
+  document.getElementById('lA2').textContent = ls[1];
+  document.getElementById('lA3').textContent = ls[2];
+}
+
+function openForm() {
+  document.getElementById('formOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updateLabels();
+}
+
+function closeForm() {
+  document.getElementById('formOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function formOverlayClick(e) {
+  if (e.target === document.getElementById('formOverlay')) closeForm();
+}
+
+function saveRecipe() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { alert('请填写配方名称'); return; }
+  const type = document.getElementById('fType').value;
+  const ls = attrMap[type];
+  data.push({
+    type, name,
+    sub: document.getElementById('fSub').value.trim(),
+    attrs: [
+      {k:ls[0], v:document.getElementById('fA1').value.trim()||'—'},
+      {k:ls[1], v:document.getElementById('fA2').value.trim()||'—'},
+      {k:ls[2], v:document.getElementById('fA3').value.trim()||'—'},
+    ],
+    ing: document.getElementById('fIng').value.trim().split('\n').filter(l=>l.trim()).map(l=>{
+      const p=l.split('，'); return {n:p[0]?.trim()||l, a:p[1]?.trim()||''};
+    }),
+    steps: document.getElementById('fSteps').value.trim().split('\n').filter(l=>l.trim()),
+    notes: document.getElementById('fNotes').value.trim(),
+  });
+  render();
+  ['fName','fSub','fA1','fA2','fA3','fIng','fSteps','fNotes'].forEach(id => document.getElementById(id).value='');
+  closeForm();
+}
+
+render();
+</script>
+</body>
+</html>
